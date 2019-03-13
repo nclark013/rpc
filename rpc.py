@@ -11,25 +11,27 @@ moves = ['rock', 'paper', 'scissors']
 """The Player class is the parent class for all of the Players
 in this game"""
 
+
 def print_pause(message_to_print):
     print(message_to_print)
     time.sleep(1)
 
+
 class Player():
-    
     def move(self):
         pass
 
     def learn(self, move1, move2):
         pass
-        
+
 
 class RandomPlayer(Player):
     def __init__(self):
         super().__init__()
-    
+
     def move(self, mode):
         return random_move(self)
+
 
 class ReflectPlayer(Player):
     def __init__(self):
@@ -39,19 +41,37 @@ class ReflectPlayer(Player):
         self.last_move1 = move1
         self.last_move2 = move2
 
+
 class CyclePlayer(Player):
     def __init__(self):
         super().__init__()
 
-    #todo - add logic to cycle through the moves
-    #define a new move method
+    def prior(self):
+        self.prior_moves = []
 
-    def learn(self, move1, move2):
-        self.last_move1 = move1
-        self.last_move2 = move2
+    def cycle(self, prior_moves):
+        self.cycle_move = random_move(self)
+        if self.cycle_move not in self.prior_moves:
+            self.prior_moves.append(self.move)
+            return self.cycle_move
+        else:
+            self.cycle(self.prior_moves)
+
+    def move(self, game_round):
+        if game_round == 0:
+            self.prior()
+            self.cycle_move = random_move(self)
+            self.prior_moves.append(self.cycle_move)
+            return self.cycle_move
+        else:
+            self.compare = set(moves).difference(self.prior_moves)
+            if len(self.compare) == 0:
+                self.prior_moves.clear()
+            self.cycle_move = self.cycle(self.prior_moves)
+            return self.cycle_move
+
 
 class HumanPlayer(Player):
-
     def move(self, mode):
         print_pause("What's your move?")
         human_move = input("rock, paper or scissors\n")
@@ -61,12 +81,13 @@ class HumanPlayer(Player):
         else:
             return human_move
 
+
 class Winner(Player):
     def __init__(self):
         super().__init__()
 
-class set_mode():
 
+class set_mode():
     def __init__(self):
         super().__init__()
 
@@ -93,20 +114,21 @@ class set_mode():
             game = Game(CyclePlayer(), CyclePlayer())
             game.play_game(mode)
 
+
 def random_move(self):
     return random.choice(moves)
 
-class Game:
 
+class Game:
     def __init__(self, p1, p2):
         self.p1 = p1
         self.p2 = p2
 
     def round_winner(self, move1, move2, game_round):
-        if self.beats(move1, move2) == True:
-            print_pause("Player 1 won round " + str(game_round + 1)) 
+        if self.beats(move1, move2) is True:
+            print_pause("Player 1 won round " + str(game_round + 1))
             self.score1 += 1
-        elif self.ties(move1, move2) == True:
+        elif self.ties(move1, move2) is True:
             print_pause("Round " + str(game_round + 1) + " is a tie")
         else:
             print_pause("Player 2 won round " + str(game_round + 1))
@@ -114,33 +136,28 @@ class Game:
         self.print_score(self.score1, self.score2)
 
     def play_round(self, mode, game_round):
-        if mode in ('1','2'):
+        if mode in ('1', '2'):
             move1 = self.p1.move(mode)
             move2 = self.p2.move(mode)
-        else:
-            #on the first round make a random move
-            #and store the moves in instance variables
+        elif mode == '3':
+            # on the first round make a random move
+            # and store the moves in instance variables
             if game_round == 0:
                 move1 = random_move(self)
                 move2 = random_move(self)
                 self.p1.learn(move1, move2)
                 self.p2.learn(move1, move2)
-            #on subsequent rounds
+            # on subsequent rounds
             else:
-                if mode == '3':
-                    #use the opponent's last move
-                    move1 = self.p1.last_move2
-                    move2 = self.p2.last_move1
-                    #reset the game last_move variables for the next round
-                    self.p1.learn(move1, move2)
-                    self.p2.learn(move1, move1)
-                elif mode == '4':
-                    #use the own last move
-                    move1 = self.p1.last_move1
-                    move2 = self.p2.last_move2
-                    #reset the game last_move variables for the next round
-                    self.p1.learn(move1, move2)
-                    self.p2.learn(move1, move2)
+                # use the opponent's last move
+                move1 = self.p1.last_move2
+                move2 = self.p2.last_move1
+                # reset the game last_move variables for the next round
+                self.p1.learn(move1, move2)
+                self.p2.learn(move1, move1)
+        elif mode == '4':
+            move1 = self.p1.move(game_round)
+            move2 = self.p2.move(game_round)
         print_pause(f"Player 1: {move1}  Player 2: {move2}")
         self.round_winner(move1, move2, game_round)
 
@@ -151,7 +168,7 @@ class Game:
         rounds = int(input("How many rounds would you like to play?\n"))
         print_pause("Game start!")
         for game_round in range(rounds):
-            print_pause(f"Round {str(game_round + 1)} :")
+            print_pause(f"Round {str(game_round + 1)}:")
             self.play_round(mode, game_round)
         print_pause("Game over!")
         print_pause("Final ")
@@ -178,13 +195,8 @@ class Game:
         else:
             print_pause("Winner: Player 2")
         self.print_score(score1, score2)
-    
-    #todo
-    #CyclePlayer class, cycles through the different moves
+
 
 if __name__ == '__main__':
     self = ''
     set_mode.mode(self)
-
-#todo
-#check formatting against pycodestyle
