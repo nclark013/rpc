@@ -30,16 +30,33 @@ class RandomPlayer(Player):
         super().__init__()
 
     def move(self, mode):
-        return random_move(self)
+        return random.choice(moves)
 
 
 class ReflectPlayer(Player):
     def __init__(self):
         super().__init__()
 
+    def move(self, game_round):
+        # on first round
+        if game_round == 0:
+            # do a random move
+            self.myMove = random.choice(moves)
+            return self.myMove
+        # on subsequent rounds
+        else:
+            # use the opponent's prior move
+            # which is set by the ReflectPlayer.learn()
+            # method in the Game.play_round() method
+            self.myMove = self.prior_move
+            return self.myMove
+
     def learn(self, move1, move2):
-        self.last_move1 = move1
-        self.last_move2 = move2
+        # set prior_move to the second variable,
+        # passed into the method, which is always
+        # the opponent's last move
+        self.prior_move = move2
+
 
 
 class CyclePlayer(Player):
@@ -50,7 +67,7 @@ class CyclePlayer(Player):
         self.prior_moves = []
 
     def cycle(self, prior_moves):
-        self.cycle_move = random_move(self)
+        self.cycle_move = random.choice(moves)
         if self.cycle_move not in self.prior_moves:
             self.prior_moves.append(self.move)
             return self.cycle_move
@@ -60,7 +77,7 @@ class CyclePlayer(Player):
     def move(self, game_round):
         if game_round == 0:
             self.prior()
-            self.cycle_move = random_move(self)
+            self.cycle_move = random.choice(moves)
             self.prior_moves.append(self.cycle_move)
             return self.cycle_move
         else:
@@ -82,9 +99,9 @@ class HumanPlayer(Player):
             return human_move
 
 
-class Winner(Player):
+""" class Winner(Player):
     def __init__(self):
-        super().__init__()
+        super().__init__() """
 
 
 class set_mode():
@@ -115,8 +132,8 @@ class set_mode():
             game.play_game(mode)
 
 
-def random_move(self):
-    return random.choice(moves)
+""" def random_move(self):
+    return random.choice(moves) """
 
 
 class Game:
@@ -140,11 +157,15 @@ class Game:
             move1 = self.p1.move(mode)
             move2 = self.p2.move(mode)
         elif mode == '3':
+            move1 = self.p1.move(game_round)
+            move2 = self.p2.move(game_round)
+            self.p1.learn(move1, move2)
+            self.p2.learn(move2, move1)
             # on the first round make a random move
             # and store the moves in instance variables
-            if game_round == 0:
-                move1 = random_move(self)
-                move2 = random_move(self)
+            """ if game_round == 0:
+                move1 = random.choice(moves)
+                move2 = random.choice(moves)
                 self.p1.learn(move1, move2)
                 self.p2.learn(move1, move2)
             # on subsequent rounds
@@ -154,7 +175,7 @@ class Game:
                 move2 = self.p2.last_move1
                 # reset the game last_move variables for the next round
                 self.p1.learn(move1, move2)
-                self.p2.learn(move1, move1)
+                self.p2.learn(move1, move1) """
         elif mode == '4':
             move1 = self.p1.move(game_round)
             move2 = self.p2.move(game_round)
