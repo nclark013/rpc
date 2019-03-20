@@ -8,9 +8,32 @@ and reports both Player's scores each round."""
 
 moves = ['rock', 'paper', 'scissors']
 
+def mode():
+    print_pause("You're going to play against the computer.\n"
+                "How should the computer play?")
+    mode = input("1. Rock On! - always plays 'rock'\n"
+                    "2. Random - chooses its moves randomly\n"
+                    "3. Learn - remembers and imitates your previous move\n"
+                    "4. Cycle - cycles through the three moves\n")
+    if mode not in ['1', '2', '3', '4']:
+        print_pause("I don't understand. Please try again.")
+        mode()
+    elif mode == '1':
+        game = Game(HumanPlayer(), RockPlayer())
+        game.play_game(mode)
+    elif mode == '2':
+        game = Game(HumanPlayer(), RandomPlayer())
+        game.play_game(mode)
+    elif mode == '3':
+        game = Game(HumanPlayer(), ReflectPlayer())
+        game.play_game(mode)
+    elif mode == '4':
+        game = Game(HumanPlayer(), CyclePlayer())
+        game.play_game(mode)
+
+
 """The Player class is the parent class for all of the Players
 in this game"""
-
 
 def print_pause(message_to_print):
     print(message_to_print)
@@ -25,19 +48,37 @@ class Player():
         pass
 
 
+class RockPlayer(Player):
+    def __init__(self):
+        super().__init__()
+
+    def move(self, mode, game_round):
+        return 'rock'
+
+    def learn(self, move1, move2):
+        pass
+
+
 class RandomPlayer(Player):
     def __init__(self):
         super().__init__()
 
-    def move(self, mode):
+    def move(self, mode, game_round):
         return random.choice(moves)
+
+    def learn(self, move1, move2):
+        pass
+        # set prior_move to the second variable,
+        # passed into the method, which is always
+        # the opponent's last move
+        #self.prior_move = move2
 
 
 class ReflectPlayer(Player):
     def __init__(self):
         super().__init__()
 
-    def move(self, game_round):
+    def move(self, mode, game_round):
         # on first round
         if game_round == 0:
             # do a random move
@@ -58,82 +99,56 @@ class ReflectPlayer(Player):
         self.prior_move = move2
 
 
-
+# todo simplify and fix "none"
 class CyclePlayer(Player):
     def __init__(self):
         super().__init__()
 
-    def prior(self):
-        self.prior_moves = []
+    prior_moves = []
 
-    def cycle(self, prior_moves):
-        self.cycle_move = random.choice(moves)
-        if self.cycle_move not in self.prior_moves:
-            self.prior_moves.append(self.move)
-            return self.cycle_move
-        else:
-            self.cycle(self.prior_moves)
+    def move(self, mode, game_round):
+        # when list is full
+        while len(self.prior_moves) == len(moves):
+            # empty the list
+            self.prior_moves.clear()
+        # when the list isn't full
+        while len(self.prior_moves) <= len(moves):
+            # random move
+            self.myMove = random.choice(moves)
+            # when random move isn't in the list
+            if self.myMove not in self.prior_moves:
+                # add it to the list
+                self.prior_moves.append(self.myMove)
+                # return the value
+                return self.myMove
+            # continue in the loop with another random move
+            # until the count of items in the list equals the
+            # total number of possible moves
 
-    def move(self, game_round):
-        if game_round == 0:
-            self.prior()
-            self.cycle_move = random.choice(moves)
-            self.prior_moves.append(self.cycle_move)
-            return self.cycle_move
-        else:
-            self.compare = set(moves).difference(self.prior_moves)
-            if len(self.compare) == 0:
-                self.prior_moves.clear()
-            self.cycle_move = self.cycle(self.prior_moves)
-            return self.cycle_move
+    def learn(self, move1, move2):
+        pass
+        # set prior_move to the second variable,
+        # passed into the method, which is always
+        # the opponent's last move
+        # self.prior_move = move2
 
 
 class HumanPlayer(Player):
-    def move(self, mode):
+    def move(self, mode, game_round):
         print_pause("What's your move?")
         human_move = input("rock, paper or scissors\n")
         if human_move not in moves:
             print_pause("I don't understand. Please try again.")
-            self.move(mode)
+            self.move(mode, game_round)
         else:
             return human_move
-
-
-""" class Winner(Player):
-    def __init__(self):
-        super().__init__() """
-
-
-class set_mode():
-    def __init__(self):
-        super().__init__()
-
-    def mode(self):
-        print_pause("Please enter the mode you "
-                    "would like to play:")
-        mode = input("1. Human vs Computer\n"
-                     "2. Computer vs Computer (random)\n"
-                     "3. Computer vs Computer (reflect)\n"
-                     "4. Computer vs Computer (cycle)\n")
-        if mode not in ['1', '2', '3', '4']:
-            print_pause("I don't understand. Please try again.")
-            set_mode.mode(self)
-        elif mode == '1':
-            game = Game(HumanPlayer(), RandomPlayer())
-            game.play_game(mode)
-        elif mode == '2':
-            game = Game(RandomPlayer(), RandomPlayer())
-            game.play_game(mode)
-        elif mode == '3':
-            game = Game(ReflectPlayer(), ReflectPlayer())
-            game.play_game(mode)
-        elif mode == '4':
-            game = Game(CyclePlayer(), CyclePlayer())
-            game.play_game(mode)
-
-
-""" def random_move(self):
-    return random.choice(moves) """
+    
+    def learn(self, move1, move2):
+        pass
+        # set prior_move to the second variable,
+        # passed into the method, which is always
+        # the opponent's last move
+        # self.prior_move = move2
 
 
 class Game:
@@ -153,32 +168,10 @@ class Game:
         self.print_score(self.score1, self.score2)
 
     def play_round(self, mode, game_round):
-        if mode in ('1', '2'):
-            move1 = self.p1.move(mode)
-            move2 = self.p2.move(mode)
-        elif mode == '3':
-            move1 = self.p1.move(game_round)
-            move2 = self.p2.move(game_round)
-            self.p1.learn(move1, move2)
-            self.p2.learn(move2, move1)
-            # on the first round make a random move
-            # and store the moves in instance variables
-            """ if game_round == 0:
-                move1 = random.choice(moves)
-                move2 = random.choice(moves)
-                self.p1.learn(move1, move2)
-                self.p2.learn(move1, move2)
-            # on subsequent rounds
-            else:
-                # use the opponent's last move
-                move1 = self.p1.last_move2
-                move2 = self.p2.last_move1
-                # reset the game last_move variables for the next round
-                self.p1.learn(move1, move2)
-                self.p2.learn(move1, move1) """
-        elif mode == '4':
-            move1 = self.p1.move(game_round)
-            move2 = self.p2.move(game_round)
+        move1 = self.p1.move(mode, game_round)
+        move2 = self.p2.move(mode, game_round)
+        self.p1.learn(move1, move2)
+        self.p2.learn(move2, move1)
         print_pause(f"Player 1: {move1}  Player 2: {move2}")
         self.round_winner(move1, move2, game_round)
 
@@ -219,5 +212,4 @@ class Game:
 
 
 if __name__ == '__main__':
-    self = ''
-    set_mode.mode(self)
+    mode()
