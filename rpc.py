@@ -8,13 +8,14 @@ and reports both Player's scores each round."""
 
 moves = ['rock', 'paper', 'scissors']
 
+
 def mode():
     print_pause("You're going to play against the computer.\n"
                 "How should the computer play?")
     mode = input("1. Rock On! - always plays 'rock'\n"
-                    "2. Random - chooses its moves randomly\n"
-                    "3. Learn - remembers and imitates your previous move\n"
-                    "4. Cycle - cycles through the three moves\n")
+                 "2. Random - chooses its moves randomly\n"
+                 "3. Learn - remembers and imitates your previous move\n"
+                 "4. Cycle - cycles through the three moves\n")
     if mode not in ['1', '2', '3', '4']:
         print_pause("I don't understand. Please try again.")
         mode()
@@ -34,6 +35,7 @@ def mode():
 
 """The Player class is the parent class for all of the Players
 in this game"""
+
 
 def print_pause(message_to_print):
     print(message_to_print)
@@ -71,7 +73,7 @@ class RandomPlayer(Player):
         # set prior_move to the second variable,
         # passed into the method, which is always
         # the opponent's last move
-        #self.prior_move = move2
+        # self.prior_move = move2
 
 
 class ReflectPlayer(Player):
@@ -142,7 +144,7 @@ class HumanPlayer(Player):
             self.move(mode, game_round)
         else:
             return human_move
-    
+
     def learn(self, move1, move2):
         pass
         # set prior_move to the second variable,
